@@ -1,23 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.ScenarioSimulator" parent="Theme.Material3.Dark.NoActionBar">
+    <style name="Theme.ScenarioSimulator" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/ss_black</item>
         <item name="android:statusBarColor">@color/ss_status_bar</item>
         <item name="android:navigationBarColor">@color/ss_nav_bar</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
-        <item name="colorPrimary">@color/ss_cyan</item>
-        <item name="colorSecondary">@color/ss_teal</item>
-        <item name="colorTertiary">@color/ss_blue</item>
-        <item name="android:colorBackground">@color/ss_black</item>
-        <item name="colorSurface">@color/ss_surface</item>
     </style>
 
-    <style name="Theme.ScenarioSimulator.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_screen</item>
-        <item name="windowSplashScreenBackground">@color/ss_splash_bg</item>
-        <item name="postSplashScreenTheme">@style/Theme.ScenarioSimulator</item>
+    <style name="Theme.ScenarioSimulator.Splash" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+        <item name="android:statusBarColor">@color/ss_status_bar</item>
+        <item name="android:navigationBarColor">@color/ss_nav_bar</item>
     </style>
-
 </resources>
