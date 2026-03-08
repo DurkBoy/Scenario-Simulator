@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <style name="Widget.ScenarioSimulator">
+        <item name="android:background">@color/ss_surface_alt</item>
+    </style>
+
     <style name="TextAppearance.ScenarioSimulator" parent="@android:style/TextAppearance.Medium">
         <item name="android:textColor">@color/ss_white</item>
     </style>
