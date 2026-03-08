@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Widget.ScenarioSimulator.Card">
+        <item name="android:background">@color/ss_surface_alt</item>
+    </style>
+
+    <style name="TextAppearance.ScenarioSimulator.Title">
+        <item name="android:textColor">@color/ss_white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="TextAppearance.ScenarioSimulator.Body">
+        <item name="android:textColor">@color/ss_text_secondary</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+</resources>

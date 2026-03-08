@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ss_black">#000000</color>
+    <color name="ss_surface">#081018</color>
+    <color name="ss_surface_alt">#0D1722</color>
+    <color name="ss_cyan">#52E5FF</color>
+    <color name="ss_blue">#2FA8FF</color>
+    <color name="ss_teal">#1ED7C5</color>
+    <color name="ss_white">#F5FBFF</color>
+    <color name="ss_text_secondary">#A8C7D8</color>
+    <color name="ss_border">#8BE9FF</color>
+    <color name="ss_status_bar">#000000</color>
+    <color name="ss_nav_bar">#000000</color>
+    <color name="ss_splash_bg">#000000</color>
+</resources>
