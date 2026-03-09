@@ -16,6 +16,9 @@ class HomeViewModel @Inject constructor(
     private val experimentRepository: ExperimentRepository
 ) : ViewModel() {
 
+    private val _allExperiments = MutableStateFlow<List<Experiment>>(emptyList())
+    val allExperiments: StateFlow<List<Experiment>> = _allExperiments.asStateFlow()
+
     private val _recentExperiments = MutableStateFlow<List<Experiment>>(emptyList())
     val recentExperiments: StateFlow<List<Experiment>> = _recentExperiments.asStateFlow()
 
@@ -23,20 +26,18 @@ class HomeViewModel @Inject constructor(
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     init {
-        loadRecentExperiments()
+        loadExperiments()
     }
 
-    private fun loadRecentExperiments() {
+    private fun loadExperiments() {
         viewModelScope.launch {
             _isLoading.value = true
             experimentRepository.getAllExperiments().collect { experiments ->
-                _recentExperiments.value = experiments.take(5) // Show last 5
+                val sorted = experiments.sortedByDescending { it.createdAt }
+                _allExperiments.value = sorted
+                _recentExperiments.value = sorted.take(5)
                 _isLoading.value = false
             }
         }
-    }
-
-    fun startNewExperiment() {
-        // Navigate to create experiment screen (handled by navigation)
     }
 }

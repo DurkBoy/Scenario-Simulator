@@ -3,13 +3,9 @@ package com.scenariosimulator.presentation.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -50,13 +46,12 @@ fun CreateExperimentScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Create Experiment") }
+                title = { Text("Simulation Lab") }
             )
         }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -65,19 +60,21 @@ fun CreateExperimentScreen(
                 OutlinedTextField(
                     value = title,
                     onValueChange = viewModel::updateTitle,
-                    label = { Text("Title") },
+                    label = { Text("Experiment Title") },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+
             item {
                 OutlinedTextField(
                     value = prompt,
                     onValueChange = viewModel::updatePrompt,
-                    label = { Text("Prompt") },
+                    label = { Text("Scenario Prompt") },
                     modifier = Modifier.fillMaxWidth(),
-                    minLines = 3
+                    minLines = 4
                 )
             }
+
             item {
                 Text("Mode", style = MaterialTheme.typography.titleMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -90,20 +87,29 @@ fun CreateExperimentScreen(
                     }
                 }
             }
+
             item {
                 Text("Select Personas (2-8)", style = MaterialTheme.typography.titleMedium)
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(availablePersonas) { persona ->
-                        PersonaCard(
-                            persona = persona,
-                            isSelected = selectedPersonas.contains(persona),
-                            onClick = { viewModel.togglePersona(persona) }
-                        )
+                if (availablePersonas.isEmpty()) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("No personas available yet. Create or load personas before starting a simulation.")
+                        Button(onClick = { navController.navigate(Screen.PersonaBuilder.route) }) {
+                            Text("Open Persona Builder")
+                        }
+                    }
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        availablePersonas.forEach { persona ->
+                            PersonaCard(
+                                persona = persona,
+                                isSelected = selectedPersonas.contains(persona),
+                                onClick = { viewModel.togglePersona(persona) }
+                            )
+                        }
                     }
                 }
             }
+
             item {
                 Text("Model Source", style = MaterialTheme.typography.titleMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -116,24 +122,27 @@ fun CreateExperimentScreen(
                     }
                 }
             }
+
             item {
                 Text("Rounds: $rounds", style = MaterialTheme.typography.titleMedium)
                 Slider(
                     value = rounds.toFloat(),
                     onValueChange = { viewModel.updateRounds(it.toInt()) },
                     valueRange = 1f..20f,
-                    steps = 19
+                    steps = 18
                 )
             }
+
             item {
                 Text("Response Length: $responseLength", style = MaterialTheme.typography.titleMedium)
                 Slider(
                     value = responseLength.toFloat(),
                     onValueChange = { viewModel.updateResponseLength(it.toInt()) },
                     valueRange = 50f..500f,
-                    steps = 9
+                    steps = 8
                 )
             }
+
             item {
                 Button(
                     onClick = {

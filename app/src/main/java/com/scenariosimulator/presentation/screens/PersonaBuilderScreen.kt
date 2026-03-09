@@ -46,7 +46,8 @@ fun PersonaBuilderScreen(
     viewModel: PersonaBuilderViewModel = hiltViewModel()
 ) {
     val personas by viewModel.personas.collectAsState()
-    val isEditing by viewModel.isEditing.collectAsState()
+    val editorOpen by viewModel.editorOpen.collectAsState()
+    val editingPersona by viewModel.isEditing.collectAsState()
     val name by viewModel.name.collectAsState()
     val role by viewModel.role.collectAsState()
     val expertise by viewModel.expertise.collectAsState()
@@ -66,83 +67,102 @@ fun PersonaBuilderScreen(
                 title = { Text("Persona Builder") },
                 actions = {
                     IconButton(onClick = { viewModel.loadPresets() }) {
-                        Icon(painterResource(id = R.drawable.ic_presets), contentDescription = "Load Presets")
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_presets),
+                            contentDescription = "Load Presets"
+                        )
                     }
                 }
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            if (isEditing != null) {
-                // Editor
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
+        if (editorOpen) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
                     Text(
-                        text = if (isEditing == null) "Create New Persona" else "Edit Persona",
+                        text = if (editingPersona == null) "Create New Persona" else "Edit Persona",
                         style = MaterialTheme.typography.headlineSmall
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-
+                }
+                item {
                     OutlinedTextField(
                         value = name,
                         onValueChange = viewModel::updateName,
                         label = { Text("Name") },
                         modifier = Modifier.fillMaxWidth()
                     )
+                }
+                item {
                     OutlinedTextField(
                         value = role,
                         onValueChange = viewModel::updateRole,
                         label = { Text("Role") },
                         modifier = Modifier.fillMaxWidth()
                     )
+                }
+                item {
                     OutlinedTextField(
                         value = expertise,
                         onValueChange = viewModel::updateExpertise,
                         label = { Text("Expertise") },
                         modifier = Modifier.fillMaxWidth()
                     )
+                }
+                item {
                     OutlinedTextField(
                         value = tone,
                         onValueChange = viewModel::updateTone,
                         label = { Text("Tone") },
                         modifier = Modifier.fillMaxWidth()
                     )
+                }
+                item {
                     OutlinedTextField(
                         value = worldview,
                         onValueChange = viewModel::updateWorldview,
                         label = { Text("Worldview") },
                         modifier = Modifier.fillMaxWidth()
                     )
+                }
+                item {
                     OutlinedTextField(
                         value = goals,
                         onValueChange = viewModel::updateGoals,
                         label = { Text("Goals") },
                         modifier = Modifier.fillMaxWidth()
                     )
+                }
+                item {
                     OutlinedTextField(
                         value = bias,
                         onValueChange = viewModel::updateBias,
                         label = { Text("Bias") },
                         modifier = Modifier.fillMaxWidth()
                     )
-
+                }
+                item {
                     Text("Creativity: ${"%.2f".format(creativity)}")
                     Slider(value = creativity, onValueChange = viewModel::updateCreativityLevel)
+                }
+                item {
                     Text("Skepticism: ${"%.2f".format(skepticism)}")
                     Slider(value = skepticism, onValueChange = viewModel::updateSkepticismLevel)
+                }
+                item {
                     Text("Assertiveness: ${"%.2f".format(assertiveness)}")
                     Slider(value = assertiveness, onValueChange = viewModel::updateAssertivenessLevel)
+                }
+                item {
                     Text("Collaboration: ${"%.2f".format(collaboration)}")
                     Slider(value = collaboration, onValueChange = viewModel::updateCollaborationLevel)
-
-                    // Color picker
+                }
+                item {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Avatar Color")
                         Spacer(modifier = Modifier.weight(1f))
@@ -165,35 +185,62 @@ fun PersonaBuilderScreen(
                             }
                         }
                     }
-
+                }
+                item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Button(onClick = viewModel::cancelEditing) {
+                        Button(
+                            onClick = viewModel::cancelEditing,
+                            modifier = Modifier.weight(1f)
+                        ) {
                             Text("Cancel")
                         }
-                        Button(onClick = viewModel::savePersona) {
-                            Text("Save")
+                        Button(
+                            onClick = viewModel::savePersona,
+                            modifier = Modifier.weight(1f),
+                            enabled = name.isNotBlank() && role.isNotBlank()
+                        ) {
+                            Text("Save Persona")
                         }
                     }
                 }
-            } else {
-                // List of personas
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    item {
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item {
+                    Column(modifier = Modifier.padding(16.dp)) {
                         Button(
                             onClick = { viewModel.startEditing() },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
+                            modifier = Modifier.fillMaxWidth()
                         ) {
                             Text("Create New Persona")
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = { viewModel.loadPresets() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Load Preset Personas")
+                        }
                     }
+                }
+
+                if (personas.isEmpty()) {
+                    item {
+                        Text(
+                            text = "No personas yet. Create one or load presets to start building experiments.",
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                } else {
                     items(personas) { persona ->
                         PersonaCard(
                             persona = persona,

@@ -2,14 +2,13 @@ package com.scenariosimulator.presentation.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -18,12 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.scenariosimulator.R
-import com.scenariosimulator.presentation.components.AnimatedCTAButton
 import com.scenariosimulator.presentation.components.ExperimentCard
 import com.scenariosimulator.presentation.home.HomeViewModel
 import com.scenariosimulator.presentation.navigation.Screen
@@ -40,49 +36,93 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Scenario Simulator") },
-                actions = {
-                    IconButton(onClick = { navController.navigate(Screen.Settings.route) }) {
-                        Icon(painterResource(id = R.drawable.ic_settings), contentDescription = "Settings")
-                    }
-                }
+                title = { Text("Scenario Simulator") }
             )
         }
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            AnimatedCTAButton(
-                text = "Start New Experiment",
-                onClick = {
-                    navController.navigate(Screen.CreateExperiment.route)
-                },
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+            item {
+                Text(
+                    text = "Dashboard",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
 
-            Text(
-                text = "Recent Experiments",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            item {
+                Button(
+                    onClick = { navController.navigate(Screen.CreateExperiment.route) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Simulation Lab")
+                }
+            }
+
+            item {
+                Button(
+                    onClick = { navController.navigate(Screen.PersonaBuilder.route) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Persona Builder")
+                }
+            }
+
+            item {
+                Button(
+                    onClick = { navController.navigate(Screen.SavedLabs.route) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Saved Labs")
+                }
+            }
+
+            item {
+                Button(
+                    onClick = { navController.navigate(Screen.Settings.route) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Settings")
+                }
+            }
+
+            item {
+                Text(
+                    text = "Recent Labs",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
 
             if (isLoading) {
-                Text("Loading...")
-            } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(recentExperiments) { experiment ->
-                        ExperimentCard(
-                            experiment = experiment,
-                            onClick = {
-                                navController.navigate(Screen.LiveSimulation.passId(experiment.id))
-                            }
+                item {
+                    Text("Loading recent labs...")
+                }
+            } else if (recentExperiments.isEmpty()) {
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = "No experiments yet. Start your first simulation or build some personas first.",
+                            style = MaterialTheme.typography.bodyLarge
                         )
                     }
+                }
+            } else {
+                items(recentExperiments) { experiment ->
+                    ExperimentCard(
+                        experiment = experiment,
+                        onClick = {
+                            if (experiment.summary != null) {
+                                navController.navigate(Screen.Summary.passId(experiment.id))
+                            } else {
+                                navController.navigate(Screen.LiveSimulation.passId(experiment.id))
+                            }
+                        }
+                    )
                 }
             }
         }

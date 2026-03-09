@@ -1,7 +1,6 @@
 package com.scenariosimulator.presentation.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,7 +26,7 @@ fun SavedLabsScreen(
     navController: NavController,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val experiments by viewModel.recentExperiments.collectAsState() // We'll use all experiments later
+    val experiments by viewModel.allExperiments.collectAsState()
 
     Scaffold(
         topBar = {
@@ -36,20 +35,34 @@ fun SavedLabsScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(experiments) { experiment ->
-                ExperimentCard(
-                    experiment = experiment,
-                    onClick = {
-                        navController.navigate(Screen.LiveSimulation.passId(experiment.id))
-                    }
-                )
+        if (experiments.isEmpty()) {
+            Text(
+                text = "No saved labs yet.",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(experiments) { experiment ->
+                    ExperimentCard(
+                        experiment = experiment,
+                        onClick = {
+                            if (experiment.summary != null) {
+                                navController.navigate(Screen.Summary.passId(experiment.id))
+                            } else {
+                                navController.navigate(Screen.LiveSimulation.passId(experiment.id))
+                            }
+                        }
+                    )
+                }
             }
         }
     }

@@ -71,7 +71,10 @@ fun LiveSimulationScreen(
 
     val listState = rememberLazyListState()
     var showInjectField by remember { mutableStateOf(false) }
-    val currentActivePersonaId = activePersonaId
+
+    LaunchedEffect(experiment?.id) {
+        viewModel.ensureSimulationStarted()
+    }
 
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) {
@@ -82,7 +85,7 @@ fun LiveSimulationScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(experiment?.title ?: "Simulation") },
+                title = { Text(experiment?.title ?: "Simulation Lab") },
                 actions = {
                     Card(
                         shape = RoundedCornerShape(16.dp),
@@ -106,6 +109,14 @@ fun LiveSimulationScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            if (experiment?.participantIds?.isEmpty() == true) {
+                Text(
+                    text = "This experiment has no personas assigned. Go back and add at least two personas.",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
@@ -114,6 +125,15 @@ fun LiveSimulationScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 state = listState
             ) {
+                if (messages.isEmpty()) {
+                    item {
+                        Text(
+                            text = if (isComplete) "Simulation complete." else "Simulation will begin once the scenario engine starts.",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+
                 items(messages) { message ->
                     val persona = personaMap[message.personaId]
                     ChatMessageBubble(
@@ -122,8 +142,9 @@ fun LiveSimulationScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
+
                 item {
-                    if (currentActivePersonaId != null) {
+                    if (activePersonaId != null) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
@@ -137,7 +158,7 @@ fun LiveSimulationScreen(
                             )
                             Spacer(modifier = Modifier.padding(4.dp))
                             Text(
-                                "${personaMap[currentActivePersonaId]?.name ?: "AI"} is thinking...",
+                                "${personaMap[activePersonaId]?.name ?: "AI"} is thinking...",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -250,6 +271,7 @@ fun LiveSimulationScreen(
                             )
                         }
                     }
+
                     IconButton(
                         onClick = viewModel::requestSummary,
                         modifier = Modifier
@@ -263,6 +285,7 @@ fun LiveSimulationScreen(
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
+
                     if (isComplete) {
                         IconButton(
                             onClick = {

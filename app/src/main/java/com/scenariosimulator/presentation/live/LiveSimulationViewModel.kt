@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.scenariosimulator.domain.engine.SimulationEngine
 import com.scenariosimulator.domain.model.Experiment
+import com.scenariosimulator.domain.model.ExperimentStatus
 import com.scenariosimulator.domain.model.Message
 import com.scenariosimulator.domain.model.Persona
 import com.scenariosimulator.domain.repository.ExperimentRepository
@@ -53,6 +54,8 @@ class LiveSimulationViewModel @Inject constructor(
     private val _injectPromptText = MutableStateFlow("")
     val injectPromptText: StateFlow<String> = _injectPromptText.asStateFlow()
 
+    private var hasStartedSimulation = false
+
     init {
         loadExperiment()
         observeSimulationState()
@@ -67,6 +70,9 @@ class LiveSimulationViewModel @Inject constructor(
                         personaRepository.getPersonaByIdSync(id)
                     }.associateBy { persona -> persona.id }
                     _personaMap.value = personas
+                    _messages.value = it.transcript
+                    _isPaused.value = it.status == ExperimentStatus.PAUSED
+                    _isComplete.value = it.status == ExperimentStatus.COMPLETED
                 }
             }
         }
@@ -75,6 +81,7 @@ class LiveSimulationViewModel @Inject constructor(
     private fun observeSimulationState() {
         viewModelScope.launch {
             simulationEngine.simulationState.collect { state ->
+                if (state.experimentId != experimentId) return@collect
                 _messages.value = state.messages
                 _activePersonaId.value = state.activePersonaId
                 _isPaused.value = state.isPaused
@@ -85,9 +92,14 @@ class LiveSimulationViewModel @Inject constructor(
         }
     }
 
-    fun startSimulation() {
-        val experiment = _experiment.value ?: return
-        simulationEngine.startSimulation(experiment)
+    fun ensureSimulationStarted() {
+        val current = _experiment.value ?: return
+        if (hasStartedSimulation) return
+        if (current.participantIds.isEmpty()) return
+        if (current.status != ExperimentStatus.CREATED) return
+
+        hasStartedSimulation = true
+        simulationEngine.startSimulation(current)
     }
 
     fun pauseSimulation() {
@@ -111,10 +123,6 @@ class LiveSimulationViewModel @Inject constructor(
         if (prompt.isEmpty()) return
         simulationEngine.injectPrompt(prompt)
         _injectPromptText.value = ""
-    }
-
-    fun injectPrompt(newPrompt: String) {
-        simulationEngine.injectPrompt(newPrompt)
     }
 
     fun forceNextSpeaker() {

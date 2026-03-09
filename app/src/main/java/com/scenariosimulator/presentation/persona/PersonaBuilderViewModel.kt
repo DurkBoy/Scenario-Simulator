@@ -21,6 +21,9 @@ class PersonaBuilderViewModel @Inject constructor(
     private val _personas = MutableStateFlow<List<Persona>>(emptyList())
     val personas: StateFlow<List<Persona>> = _personas.asStateFlow()
 
+    private val _editorOpen = MutableStateFlow(false)
+    val editorOpen: StateFlow<Boolean> = _editorOpen.asStateFlow()
+
     private val _isEditing = MutableStateFlow<Persona?>(null)
     val isEditing: StateFlow<Persona?> = _isEditing.asStateFlow()
 
@@ -74,7 +77,6 @@ class PersonaBuilderViewModel @Inject constructor(
 
     fun startEditing(persona: Persona? = null) {
         if (persona == null) {
-            // New persona
             _name.value = ""
             _role.value = ""
             _expertise.value = ""
@@ -87,14 +89,13 @@ class PersonaBuilderViewModel @Inject constructor(
             _assertivenessLevel.value = 0.5f
             _collaborationLevel.value = 0.5f
             _avatarColor.value = Color(
-                Random.nextFloat(),
-                Random.nextFloat(),
-                Random.nextFloat(),
-                1f
+                red = Random.nextFloat(),
+                green = Random.nextFloat(),
+                blue = Random.nextFloat(),
+                alpha = 1f
             )
             _isEditing.value = null
         } else {
-            // Edit existing
             _name.value = persona.name
             _role.value = persona.role
             _expertise.value = persona.expertise
@@ -109,9 +110,11 @@ class PersonaBuilderViewModel @Inject constructor(
             _avatarColor.value = persona.avatarColor
             _isEditing.value = persona
         }
+        _editorOpen.value = true
     }
 
     fun cancelEditing() {
+        _editorOpen.value = false
         _isEditing.value = null
     }
 
@@ -129,42 +132,56 @@ class PersonaBuilderViewModel @Inject constructor(
     fun updateAvatarColor(color: Color) { _avatarColor.value = color }
 
     fun savePersona() {
-        val persona = Persona(
-            id = _isEditing.value?.id ?: "",
-            name = _name.value,
-            role = _role.value,
-            expertise = _expertise.value,
-            tone = _tone.value,
-            worldview = _worldview.value,
-            goals = _goals.value,
-            bias = _bias.value,
-            creativityLevel = _creativityLevel.value,
-            skepticismLevel = _skepticismLevel.value,
-            assertivenessLevel = _assertivenessLevel.value,
-            collaborationLevel = _collaborationLevel.value,
-            avatarColor = _avatarColor.value
-        )
+        val existing = _isEditing.value
+        val persona = if (existing != null) {
+            Persona(
+                id = existing.id,
+                name = _name.value.trim(),
+                role = _role.value.trim(),
+                expertise = _expertise.value.trim(),
+                tone = _tone.value.trim(),
+                worldview = _worldview.value.trim(),
+                goals = _goals.value.trim(),
+                bias = _bias.value.trim(),
+                creativityLevel = _creativityLevel.value,
+                skepticismLevel = _skepticismLevel.value,
+                assertivenessLevel = _assertivenessLevel.value,
+                collaborationLevel = _collaborationLevel.value,
+                avatarColor = _avatarColor.value
+            )
+        } else {
+            Persona(
+                name = _name.value.trim(),
+                role = _role.value.trim(),
+                expertise = _expertise.value.trim(),
+                tone = _tone.value.trim(),
+                worldview = _worldview.value.trim(),
+                goals = _goals.value.trim(),
+                bias = _bias.value.trim(),
+                creativityLevel = _creativityLevel.value,
+                skepticismLevel = _skepticismLevel.value,
+                assertivenessLevel = _assertivenessLevel.value,
+                collaborationLevel = _collaborationLevel.value,
+                avatarColor = _avatarColor.value
+            )
+        }
+
         viewModelScope.launch {
             personaRepository.savePersona(persona)
             cancelEditing()
-            loadPersonas()
         }
     }
 
     fun deletePersona(persona: Persona) {
         viewModelScope.launch {
             personaRepository.deletePersona(persona.id)
-            loadPersonas()
         }
     }
 
     fun loadPresets() {
         viewModelScope.launch {
             val presets = personaRepository.getPresetPersonas()
-            for (p in presets) {
-                personaRepository.savePersona(p)
-            }
-            loadPersonas()
+            presets.forEach { personaRepository.savePersona(it) }
         }
     }
 }
