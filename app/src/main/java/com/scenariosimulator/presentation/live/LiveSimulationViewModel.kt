@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.scenariosimulator.domain.engine.SimulationEngine
 import com.scenariosimulator.domain.model.Experiment
 import com.scenariosimulator.domain.model.Message
+import com.scenariosimulator.domain.model.Persona
 import com.scenariosimulator.domain.repository.ExperimentRepository
 import com.scenariosimulator.domain.repository.PersonaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,6 +50,9 @@ class LiveSimulationViewModel @Inject constructor(
     private val _tensionScore = MutableStateFlow(0f)
     val tensionScore: StateFlow<Float> = _tensionScore.asStateFlow()
 
+    private val _injectPromptText = MutableStateFlow("")
+    val injectPromptText: StateFlow<String> = _injectPromptText.asStateFlow()
+
     init {
         loadExperiment()
         observeSimulationState()
@@ -59,10 +63,9 @@ class LiveSimulationViewModel @Inject constructor(
             experimentRepository.getExperiment(experimentId).collect { experiment ->
                 _experiment.value = experiment
                 experiment?.let {
-                    // Load personas
                     val personas = it.participantIds.mapNotNull { id ->
                         personaRepository.getPersonaByIdSync(id)
-                    }.associateBy { it.id }
+                    }.associateBy { persona -> persona.id }
                     _personaMap.value = personas
                 }
             }
@@ -97,6 +100,17 @@ class LiveSimulationViewModel @Inject constructor(
 
     fun stopSimulation() {
         simulationEngine.stopSimulation()
+    }
+
+    fun updateInjectPrompt(value: String) {
+        _injectPromptText.value = value
+    }
+
+    fun injectPrompt() {
+        val prompt = _injectPromptText.value.trim()
+        if (prompt.isEmpty()) return
+        simulationEngine.injectPrompt(prompt)
+        _injectPromptText.value = ""
     }
 
     fun injectPrompt(newPrompt: String) {

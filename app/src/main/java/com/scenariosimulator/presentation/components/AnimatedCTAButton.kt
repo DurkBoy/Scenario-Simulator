@@ -1,6 +1,6 @@
 package com.scenariosimulator.presentation.components
 
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,8 +26,8 @@ fun AnimatedCTAButton(
     enabled: Boolean = true
 ) {
     var pressed by remember { mutableStateOf(false) }
-    val scale by animateDpAsState(
-        targetValue = if (pressed) 0.95.dp else 1.dp,
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) 0.95f else 1f,
         animationSpec = tween(durationMillis = 100),
         label = "button_scale"
     )
@@ -42,7 +42,7 @@ fun AnimatedCTAButton(
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
-            .scale(scale.value / 1.dp),
+            .scale(scale),
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,

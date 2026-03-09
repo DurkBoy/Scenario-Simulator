@@ -61,7 +61,7 @@ class SimulationEngine @Inject constructor(
             turnMutex.withLock {
                 activeTurnJob?.cancelAndJoin()
                 currentExperiment = experiment.copy(
-                    status = ExperimentStatus.RUNNING,
+                    status = ExperimentStatus.IN_PROGRESS,
                     transcript = emptyList()
                 )
                 currentRound = 1
@@ -256,7 +256,7 @@ class SimulationEngine @Inject constructor(
 
                 currentExperiment = liveExperiment.copy(
                     transcript = _simulationState.value.messages,
-                    status = ExperimentStatus.RUNNING
+                    status = ExperimentStatus.IN_PROGRESS
                 )
 
                 recalculateScoresLocked()

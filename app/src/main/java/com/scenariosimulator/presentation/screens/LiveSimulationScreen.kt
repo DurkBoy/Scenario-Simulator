@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,7 +22,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -71,6 +71,7 @@ fun LiveSimulationScreen(
 
     val listState = rememberLazyListState()
     var showInjectField by remember { mutableStateOf(false) }
+    val currentActivePersonaId = activePersonaId
 
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) {
@@ -91,9 +92,9 @@ fun LiveSimulationScreen(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("C: ${(consensusScore*100).toInt()}%", color = MaterialTheme.colorScheme.onSecondaryContainer)
+                            Text("C: ${(consensusScore * 100).toInt()}%", color = MaterialTheme.colorScheme.onSecondaryContainer)
                             Spacer(modifier = Modifier.padding(4.dp))
-                            Text("T: ${(tensionScore*100).toInt()}%", color = MaterialTheme.colorScheme.onSecondaryContainer)
+                            Text("T: ${(tensionScore * 100).toInt()}%", color = MaterialTheme.colorScheme.onSecondaryContainer)
                         }
                     }
                 }
@@ -105,7 +106,6 @@ fun LiveSimulationScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Messages area
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
@@ -123,7 +123,7 @@ fun LiveSimulationScreen(
                     )
                 }
                 item {
-                    if (activePersonaId != null) {
+                    if (currentActivePersonaId != null) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
@@ -137,7 +137,7 @@ fun LiveSimulationScreen(
                             )
                             Spacer(modifier = Modifier.padding(4.dp))
                             Text(
-                                "${personaMap[activePersonaId]?.name ?: "AI"} is thinking...",
+                                "${personaMap[currentActivePersonaId]?.name ?: "AI"} is thinking...",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -146,7 +146,6 @@ fun LiveSimulationScreen(
                 }
             }
 
-            // Inject prompt field with animation
             AnimatedVisibility(
                 visible = showInjectField,
                 enter = slideInVertically(initialOffsetY = { it }) + fadeIn() + expandVertically(),
@@ -194,7 +193,6 @@ fun LiveSimulationScreen(
                 }
             }
 
-            // Control panel with glassy effect
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -267,7 +265,11 @@ fun LiveSimulationScreen(
                     }
                     if (isComplete) {
                         IconButton(
-                            onClick = { navController.navigate(Screen.Summary.passId(experiment?.id ?: "")) },
+                            onClick = {
+                                experiment?.id?.let { id ->
+                                    navController.navigate(Screen.Summary.passId(id))
+                                }
+                            },
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(MaterialTheme.colorScheme.primary)
