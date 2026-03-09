@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.scenariosimulator.BuildConfig
 import com.scenariosimulator.data.remote.gemini.GeminiApi
+import com.scenariosimulator.data.remote.huggingface.HuggingFaceApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,6 +38,18 @@ object NetworkModule {
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .build()
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideHuggingFaceApi(client: OkHttpClient, gson: Gson): HuggingFaceApi {
+        return Retrofit.Builder()
+            .baseUrl("https://api-inference.huggingface.co/")
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+            .create(HuggingFaceApi::class.java)
     }
 
     @Provides
